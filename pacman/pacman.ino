@@ -38,7 +38,7 @@ int gripper = 8;
 int neck = 7;
 //line tracker
 QTRSensors qtr;
-const int SensorCount = 6;
+const int SensorCount = 8;
 int sensorValues[SensorCount];
 const int sensorMax0 = 800;
 const int sensorMax6 = 800;
@@ -61,7 +61,7 @@ void setup() {
   digitalWrite(neck, LOW);
   
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const int[]){A0, A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setSensorPins((const int[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
 
  moveToCone(60);  
  servo(gripper, 500);
@@ -89,7 +89,7 @@ void loop() {
   qtr.read(sensorValues);
 //waardes van de line tracker, voor dat de game begint deze uitcommenten en de waardes lezen. 
  //Serial.println(sensorValues[0]);
- //Serial.println(sensorValues[5]);
+ //Serial.println(sensorValues[7]);
  
 
   
@@ -129,7 +129,7 @@ delay(500);
  
  qtr.read(sensorValues);
 
-//if(sensorValues[0] >= sensorMax0 && sensorValues[5] >= sensorMax6){
+//if(sensorValues[0] >= sensorMax0 && sensorValues[7] >= sensorMax6){
 //  stopVehicle();
 //  servo(gripper, 1500);
 //  moveBackward(20);
