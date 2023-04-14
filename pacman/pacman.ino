@@ -10,10 +10,10 @@ Adafruit_NeoPixel *pixels;
 
 //StripA is voor blauw en stripB is voor de roze bij de underglow
 //stripC en D zijn voor de neopixels op de robot. Zijn gescheiden omdat de strip voor de underglow GBR is en de top RGB. Je krijgt anders andere kleuren
-byte stripA[] = {4,6,8,10}; //roze undeglow
-byte stripB[] = {5,7,9,11}; //blauw underglow
-byte stripC[] = {0,2}; //roze top neopixels
-byte stripD[] = {1,3}; //blauw top neopixels
+int stripA[] = {4,6,8,10}; //roze undeglow
+int stripB[] = {5,7,9,11}; //blauw underglow
+int stripC[] = {0,2}; //roze top neopixels
+int stripD[] = {1,3}; //blauw top neopixels
 
 //ultrasonic
 int echoPin = 13;
@@ -38,8 +38,8 @@ int gripper = 8;
 int neck = 7;
 //line tracker
 QTRSensors qtr;
-const uint8_t SensorCount = 6;
-uint16_t sensorValues[SensorCount];
+const int SensorCount = 6;
+int sensorValues[SensorCount];
 const int sensorMax0 = 800;
 const int sensorMax6 = 800;
 
@@ -61,7 +61,7 @@ void setup() {
   digitalWrite(neck, LOW);
   
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){A0, A1, A2, A3, A4, A5}, SensorCount);
+  qtr.setSensorPins((const int[]){A0, A1, A2, A3, A4, A5}, SensorCount);
 
  moveToCone(60);  
  servo(gripper, 500);
