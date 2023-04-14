@@ -21,7 +21,7 @@ int triggerPin = 12;
 double duration; 
 double distance;
 double distanceLeft;
-double distanceRignt;
+double distanceRight;
 double distanceForward;
 //wheels
 int reverseRight = 9;
@@ -105,7 +105,7 @@ delay(500);
   stopVehicle();
   servo(neck, 2400);
   scanDistance();
-  distanceRignt = distance;
+  distanceRight = distance;
   //Serial.println(distanceRight);
   delay(800);
   servo(neck, 400);
@@ -117,10 +117,10 @@ delay(500);
   //Serial.println("keuze maken");
   
     if(distanceForward <= 15){
-      if(distanceRignt < distanceLeft){
+      if(distanceRight < distanceLeft){
       //Serial.println("Links");
       turnLeft(25);
-    }else if(distanceRignt > distanceLeft){
+    }else if(distanceRight > distanceLeft){
       //Serial.println("rechts");
       turnRight(25);
     }
