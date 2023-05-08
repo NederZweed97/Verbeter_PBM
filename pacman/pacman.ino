@@ -40,8 +40,7 @@ int neck = 7;
 QTRSensors qtr;
 const int SensorCount = 8;
 int sensorValues[SensorCount];
-const int sensorMax0 = 800;
-const int sensorMax6 = 800;
+
 
 
 void setup() {
@@ -61,7 +60,10 @@ void setup() {
   digitalWrite(neck, LOW);
   
   qtr.setTypeAnalog();
-  qtr.setSensorPins((const int[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
+  qtr.setSensorPins((const byte[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
+
+
+  calibrateSensors();
 
  moveToCone(60);  
  servo(gripper, 500);
@@ -82,39 +84,40 @@ void setup() {
   }
 }
 
+
 void loop() {
-   pixels->clear(); // Set all pixel colors to 'off'
-
-  
-  qtr.read(sensorValues);
-//waardes van de line tracker, voor dat de game begint deze uitcommenten en de waardes lezen. 
- //Serial.println(sensorValues[0]);
- //Serial.println(sensorValues[7]);
- 
-
-  
-moveForward(15);
- qtr.read(sensorValues);
-scanDistance();
-delay(500);
-//Serial.println(distance);
-
-
-
-  distanceForward = distance;
-  stopVehicle();
-  servo(neck, 2400);
-  scanDistance();
-  distanceRight = distance;
+//   pixels->clear(); // Set all pixel colors to 'off'
+//
+//  
+//  qtr.read(sensorValues);
+////waardes van de line tracker, voor dat de game begint deze uitcommenten en de waardes lezen. 
+// //Serial.println(sensorValues[0]);
+// //Serial.println(sensorValues[7]);
+// 
+//
+//  
+//moveForward(15);
+// qtr.read(sensorValues);
+//scanDistance();
+//delay(500);
+////Serial.println(distance);
+//
+//
+//
+//  distanceForward = distance;
+//  stopVehicle();
+//  servo(neck, 2400);
+//  scanDistance();
+//  distanceRight = distance;
   //Serial.println(distanceRight);
   delay(800);
   servo(neck, 400);
   delay(800);
   scanDistance();
   distanceLeft = distance;
- // Serial.println(distanceLeft);
+  Serial.println(distanceLeft);
   servo(neck, 1400);
-  //Serial.println("keuze maken");
+  Serial.println("keuze maken");
   
     if(distanceForward <= 15){
       if(distanceRight < distanceLeft){
@@ -126,17 +129,15 @@ delay(500);
     }
     }
 
+qtr.read(sensorValues);
+if(sensorValues[0] >= sensorMax0 && sensorValues[7] >= sensorMax6){
+  stopVehicle();
+  servo(gripper, 1500);
+  moveBackward(20);
+  delay(1000);
+  exit(0);
  
- qtr.read(sensorValues);
-
-//if(sensorValues[0] >= sensorMax0 && sensorValues[7] >= sensorMax6){
-//  stopVehicle();
-//  servo(gripper, 1500);
-//  moveBackward(20);
-//  delay(1000);
-//  exit(0);
-//  
-//}
+}
 
 }
 
@@ -152,11 +153,10 @@ bool moveToCone(int pulsecount){
 }
 
   
-
-void moveForward(int pulsecount) {
-  while(counterA <= pulsecount){
-  analogWrite(forwardLeft, 200);
-  analogWrite(forwardRight, 210);
+void moveForward(int pulsecount, int snelheid) {
+  while(counterB <= pulsecount){
+  analogWrite(forwardLeft, snelheid);
+  analogWrite(forwardRight, snelheid);
   analogWrite(reverseLeft, LOW);
   analogWrite(reverseRight, LOW);
 
@@ -178,16 +178,16 @@ void moveForward(int pulsecount) {
   pixels->show();
   }
   stopVehicle();
-  counterA = 0;
+  counterB = 0;
 }
 
    
-void moveBackward(int pulsecount) {
-  while(counterA <= pulsecount){
+void moveBackward(int pulsecount, int snelheid) {
+  while(counterB <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, LOW);
-    analogWrite(reverseLeft, 200);
-    analogWrite(reverseRight, 210);
+    analogWrite(reverseLeft, snelheid);
+    analogWrite(reverseRight, snelheid);
   } 
     stopVehicle();
     counterA = 0;
@@ -196,25 +196,25 @@ void moveBackward(int pulsecount) {
 }
 
 void turnRight(int pulsecount) {
-  while(counterA <= pulsecount){
+  while(counterB <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, 180);
     analogWrite(reverseLeft, 170);
     analogWrite(reverseRight, LOW);
   } 
     stopVehicle();
-    counterA = 0;  
+    counterB = 0;  
 } 
 
 void turnLeft(int pulsecount) {
-  while(counterB <= pulsecount){
+  while(counterA <= pulsecount){
     analogWrite(forwardLeft, 180);
     analogWrite(forwardRight, LOW);
     analogWrite(reverseLeft, LOW);
     analogWrite(reverseRight, 170);
   } 
     stopVehicle();
-    counterB = 0; 
+    counterA = 0; 
 } 
  
 void countA(){
@@ -270,4 +270,41 @@ void servo(int PIN, int pulse){
     digitalWrite(PIN, LOW);
     delay(20);
   }  
+}
+
+void calibrateSensors(){
+  for(int i = 1; i <= 10; i++){
+  qtr.calibrate();
+  for(int j = 1; j <= 10; j++){
+    moveForward(2, 190);
+  }
+  stopVehicle();
+
+  for(int k = 1; k <= 10; k++){
+    moveBackward(2, 190);
+  }
+  stopVehicle();
+  for(int z = 1; z <= 10; z++){
+    moveForward(2, 190);
+  }
+  stopVehicle();
+  for(int k = 1; k <= 10; k++){
+    moveBackward(2, 190);
+  }
+  stopVehicle();
+
+}
+   for (int i = 0; i < SensorCount; i++)
+  {
+    Serial.print(qtr.calibrationOn.minimum[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+
+  // print the calibration maximum values measured when emitters were on
+  for (int i = 0; i < SensorCount; i++)
+  {
+    Serial.print(qtr.calibrationOn.maximum[i]);
+    Serial.print(' ');
+  }
 }
