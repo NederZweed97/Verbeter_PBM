@@ -1,3 +1,4 @@
+//Sarah Vogelzang
 #include <Adafruit_NeoPixel.h>
 #include <QTRSensors.h>
 #include "music.h"
