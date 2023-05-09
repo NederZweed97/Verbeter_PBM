@@ -126,3 +126,19 @@ int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 int wholenote = (60000 * 4) / tempo;
 
 int divider = 0, noteDuration = 0;
+
+void playMusic(){
+    //credits: https://github.com/robsoncouto/arduino-songs/blob/master/pacman/pacman.ino
+  for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
+    divider = melody[thisNote + 1];
+    if (divider > 0) {
+      noteDuration = (wholenote) / divider;
+    } else if (divider < 0) {
+      noteDuration = (wholenote) / abs(divider);
+      noteDuration *= 1.5; 
+    }
+    tone(buzzer, melody[thisNote], noteDuration * 0.9);
+    delay(noteDuration);
+    noTone(buzzer);
+  }
+}
