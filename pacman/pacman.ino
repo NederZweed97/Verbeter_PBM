@@ -113,9 +113,9 @@ void loop() {
 }
 
 void moveForward(int pulsecount) {
-  while(counterB <= pulsecount){
-  analogWrite(forwardLeft, 170);
-  analogWrite(forwardRight, 180);
+  while(counterA <= pulsecount){
+  analogWrite(forwardLeft, 180);
+  analogWrite(forwardRight, 182);
   analogWrite(reverseLeft, LOW);
   analogWrite(reverseRight, LOW);
   
@@ -137,7 +137,6 @@ void moveForward(int pulsecount) {
   pixels->show();
   }
   stopVehicle();
-  counterB = 0;
   counterA = 0;
 }
 
@@ -146,8 +145,8 @@ void moveBackward(int pulsecount) {
   while(counterB <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, LOW);
-    analogWrite(reverseLeft, 180);
-    analogWrite(reverseRight, 170);
+    analogWrite(reverseLeft, 200);
+    analogWrite(reverseRight, 186);
   } 
     stopVehicle();
     counterA = 0;
@@ -155,25 +154,25 @@ void moveBackward(int pulsecount) {
 }
 
 void turnRight(int pulsecount) {
-  while(counterB <= pulsecount){
+  while(counterA <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, 180);
     analogWrite(reverseLeft, 170);
     analogWrite(reverseRight, LOW);
   } 
     stopVehicle();
-    counterB = 0;  
+    counterA = 0;  
 } 
 
 void turnLeft(int pulsecount) {
-  while(counterA <= pulsecount){
+  while(counterB <= pulsecount){
     analogWrite(forwardLeft, 180);
     analogWrite(forwardRight, LOW);
     analogWrite(reverseLeft, LOW);
     analogWrite(reverseRight, 170);
   } 
     stopVehicle();
-    counterA = 0; 
+    counterB = 0; 
 } 
  
 void countA(){
@@ -186,8 +185,8 @@ void countB(){
  
 void stopVehicle(){
   analogWrite(forwardLeft, LOW);
-  analogWrite(forwardRight, LOW);
-  analogWrite(reverseLeft, LOW);
+  analogWrite(forwardRight, LOW); 
+  analogWrite(reverseLeft, LOW);   
   analogWrite(reverseRight, LOW);
   counterA = 0;
   counterB = 0;
@@ -202,7 +201,7 @@ void stopVehicle(){
     pixels->setPixelColor(stripC[k], pixels->Color(255,0,0));
   }
   for(int l = 0; l < sizeof(stripD); l++){
-    pixels->setPixelColor(stripD[h], pixels->Color(255,0,0));    
+    pixels->setPixelColor(stripD[l], pixels->Color(255,0,0));    
   }
   pixels->show();
  }
@@ -232,24 +231,22 @@ void calibrateSensors(){
   for(int i = 1; i <= 10; i++){
     qtr.calibrate();
     for(int j = 1; j <= 10; j++){
-      moveForward(3);
+      moveForward(2);
+      counterA = 0;
+      counterB = 0;
     }
+
+
     stopVehicle();
     for(int k = 1; k <= 10; k++){
       moveBackward(4);
+      counterA = 0;
+      counterB = 0;
     }
-    stopVehicle();
-    for(int l = 1; l <= 10; l++){
-      moveForward(3);
-    }
-    stopVehicle();
-    for(int m = 1; m <= 10; m++){
-      moveBackward(4);
+ 
   }
   stopVehicle();
-}
- stopVehicle();
- 
+
    for (int i = 0; i < SensorCount; i++)
   {
     Serial.print(qtr.calibrationOn.minimum[i]);
