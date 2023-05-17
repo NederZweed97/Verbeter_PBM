@@ -9,12 +9,18 @@ int neopin =  4;
 int numPixels  = 12; 
 int pixelFormat = NEO_RGB + NEO_KHZ800;
 Adafruit_NeoPixel *pixels;
-//StripA is voor blauw en stripB is voor de roze bij de underglow
-//stripC en D zijn voor de neopixels op de robot. Zijn gescheiden omdat de strip voor de underglow GBR is en de top RGB. Je krijgt anders andere kleuren
-int stripA[] = {4,6,8,10}; //roze undeglow
-int stripB[] = {5,7,9,11}; //blauw underglow
-int stripC[] = {0,2}; //roze top neopixels
-int stripD[] = {1,3}; //blauw top neopixels
+ byte ll = 0;
+ byte lr = 1;
+ byte rr = 2;
+ byte rl = 3;
+ byte uglow1 = 4;
+ byte uglow2 = 5;
+ byte uglow3 = 6;
+ byte uglow4 = 7;
+ byte uglow5 = 8;
+ byte uglow6 = 9;
+ byte uglow7 = 10;
+ byte uglow8 = 11;
 //ultrasonic
 int echoPin = 13;
 int triggerPin = 12; 
@@ -60,10 +66,10 @@ void setup() {
   //zet alle analoge pinnen als input pinnen voor de line tracker
   qtr.setSensorPins((const byte[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
   calibrateSensors();
-  moveForward(60);  
-  servo(gripper, 500);
-  turnRight(25);
-  playMusic(); //functie, noten en lied staat in music.h
+//  moveForward(60);  
+//  servo(gripper, 500);
+//  turnRight(25);
+//  playMusic(); //functie, noten en lied staat in music.h
 }
 
 void loop() {
@@ -82,7 +88,7 @@ void loop() {
 //  servo(neck, 2400);
 //  scanDistance();
 //  distanceRight = distance;
-  //Serial.println(distanceRight);
+//  Serial.println(distanceRight);
 //  delay(800);
 //  servo(neck, 400);
 //  delay(800);
@@ -92,7 +98,7 @@ void loop() {
 //  servo(neck, 1400);
 //  Serial.println("keuze maken");
 //  
-//    if(distanceForward <= 15){
+//    if(distanceForward < 30){
 //      if(distanceRight < distanceLeft){
 //      //Serial.println("Links");
 //      turnLeft(25);
@@ -100,8 +106,6 @@ void loop() {
 //      //Serial.println("rechts");
 //      turnRight(25);
 //    }
-//    }
-//
 //qtr.read(sensorValues);
 //if(sensorValues[0] >= sensorMax0 && sensorValues[7] >= sensorMax6){
 //  stopVehicle();
@@ -110,7 +114,41 @@ void loop() {
 //  delay(1000);
 //  exit(0);
 //}
+
+  int position = qtr.readLineBlack(sensorValues);
+  moveForward(40);
+  distanceForward = distance;
+  stopVehicle();
+  servo(neck, 2400);
+  scanDistance();
+  distanceRight = distance;
+  //Serial.println(distanceRight);
+  delayMicroseconds(80);
+  servo(neck, 400);
+  delayMicroseconds(80);
+  scanDistance();
+  distanceLeft = distance;
+  //Serial.println(distanceLeft);
+  servo(neck, 1400);
+  //Serial.println("keuze maken");
+
+  if(distanceForward <= 20){
+    if(distanceRight > distanceLeft){
+      turnRight(10);
+    } else{
+      turnLeft(10);
+    }
+  }
+
+  for(int i = 0; i < SensorCount; i++){
+    if(SensorValues[i] == qtr.calibrationOn.maximum[i]){
+      StopVehicle();
+      exit(0);
+    }
+  }
 }
+
+
 
 void moveForward(int pulsecount) {
   while(counterA <= pulsecount){
@@ -118,22 +156,19 @@ void moveForward(int pulsecount) {
   analogWrite(forwardRight, 182);
   analogWrite(reverseLeft, LOW);
   analogWrite(reverseRight, LOW);
-  
-  for(int i = 0; i < sizeof(stripA); i++){
-     pixels->setPixelColor(stripA[i], pixels->Color(0,255,50));
-  }
-
-  for(int j = 0; j < sizeof(stripB); j++){
-    pixels->setPixelColor(stripB[j], pixels->Color(0,0,150));
-  }
-
-  for(int k = 0; k < sizeof(stripC); k++){
-    pixels->setPixelColor(stripC[k], pixels->Color(255,0,50));
-  }
-
-  for(int h = 0; h < sizeof(stripD); h++){
-    pixels->setPixelColor(stripD[h], pixels->Color(0,0,150));    
-  }
+      pixels->setPixelColor(ll, pixels->Color(255,0,50));
+    pixels->setPixelColor(lr, pixels->Color(0,0,150));
+    pixels->setPixelColor(rr, pixels->Color(255,0,50));
+    pixels->setPixelColor(rl, pixels->Color(0,0,150));
+    //underglow neopixels    
+    pixels->setPixelColor(uglow1, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow2, pixels->Color(0,0,250));
+    pixels->setPixelColor(uglow3, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow4, pixels->Color(0,0,250));
+    pixels->setPixelColor(uglow5, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow6, pixels->Color(0,0,250));
+    pixels->setPixelColor(uglow7, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow8, pixels->Color(0,0,250));
   pixels->show();
   }
   stopVehicle();
@@ -145,8 +180,8 @@ void moveBackward(int pulsecount) {
   while(counterB <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, LOW);
-    analogWrite(reverseLeft, 200);
-    analogWrite(reverseRight, 186);
+    analogWrite(reverseLeft, 210);
+    analogWrite(reverseRight, 188);
   } 
     stopVehicle();
     counterA = 0;
@@ -190,19 +225,19 @@ void stopVehicle(){
   analogWrite(reverseRight, LOW);
   counterA = 0;
   counterB = 0;
-
-  for(int i = 0; i < sizeof(stripA); i++){
-    pixels->setPixelColor(stripA[i], pixels->Color(0,255,0));
-  }
-  for(int j = 0; j < sizeof(stripB); j++){
-    pixels->setPixelColor(stripB[j], pixels->Color(0,255,0));
-  }
-  for(int k = 0; k < sizeof(stripC); k++){
-    pixels->setPixelColor(stripC[k], pixels->Color(255,0,0));
-  }
-  for(int l = 0; l < sizeof(stripD); l++){
-    pixels->setPixelColor(stripD[l], pixels->Color(255,0,0));    
-  }
+    pixels->setPixelColor(ll, pixels->Color(255,0,0));
+    pixels->setPixelColor(lr, pixels->Color(255,0,0));
+    pixels->setPixelColor(rr, pixels->Color(255,0,0));
+    pixels->setPixelColor(rl, pixels->Color(255,0,0));
+    //underglow neopixels
+    pixels->setPixelColor(uglow1, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow2, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow3, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow4, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow5, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow6, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow7, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow8, pixels->Color(0,255,0));
   pixels->show();
  }
 
@@ -228,22 +263,19 @@ void servo(int PIN, int pulse){
 }
 
 void calibrateSensors(){
-  for(int i = 1; i <= 10; i++){
+  for(int i = 1; i <= 20; i++){
     qtr.calibrate();
-    for(int j = 1; j <= 10; j++){
-      moveForward(2);
+    for(int j = 1; j <= 5; j++){
+      moveForward(1);
       counterA = 0;
       counterB = 0;
     }
-
-
     stopVehicle();
-    for(int k = 1; k <= 10; k++){
-      moveBackward(4);
+    for(int k = 1; k <= 5; k++){
+      moveBackward(2);
       counterA = 0;
       counterB = 0;
     }
- 
   }
   stopVehicle();
 
