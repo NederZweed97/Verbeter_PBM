@@ -11,3 +11,6 @@ Calibratie tijden setup
 
 ### typefoutjes
 distanceRignt --> distanceRight
+
+### Neopixels
+helderheid omlaag, trok volgens mij veel energie
