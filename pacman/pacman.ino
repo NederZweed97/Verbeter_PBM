@@ -35,8 +35,8 @@ int forwardRight = 10;
 int reverseLeft = 6;
 int forwardLeft = 11;
 //pulsesensor
-int speedSensorA = 2; 
-int speedSensorB = 3; 
+int speedSensorA = 2; //rechts
+int speedSensorB = 3; //links
 int counterA = 0;
 int counterB = 0;
 //servos
@@ -65,98 +65,57 @@ void setup() {
   qtr.setTypeAnalog();
   //zet alle analoge pinnen als input pinnen voor de line tracker
   qtr.setSensorPins((const byte[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
-  calibrateSensors();
+  //calibrateSensors();
 //  moveForward(60);  
 //  servo(gripper, 500);
 //  turnRight(25);
 //  playMusic(); //functie, noten en lied staat in music.h
 }
 
-void loop() {
-//   pixels->clear(); // Set all pixel colors to 'off'
-//  qtr.read(sensorValues);
-////waardes van de line tracker, voor dat de game begint deze uitcommenten en de waardes lezen. 
-// //Serial.println(sensorValues[0]);
-// //Serial.println(sensorValues[7]); 
-//moveForward(15);
-// qtr.read(sensorValues);
-//scanDistance();
-//delay(500);
-////Serial.println(distance);
-//  distanceForward = distance;
-//  stopVehicle();
-//  servo(neck, 2400);
-//  scanDistance();
-//  distanceRight = distance;
-//  Serial.println(distanceRight);
-//  delay(800);
-//  servo(neck, 400);
-//  delay(800);
-//  scanDistance();
-//  distanceLeft = distance;
-//  Serial.println(distanceLeft);
-//  servo(neck, 1400);
-//  Serial.println("keuze maken");
-//  
-//    if(distanceForward < 30){
-//      if(distanceRight < distanceLeft){
-//      //Serial.println("Links");
-//      turnLeft(25);
-//    }else if(distanceRight > distanceLeft){
-//      //Serial.println("rechts");
-//      turnRight(25);
-//    }
-//qtr.read(sensorValues);
-//if(sensorValues[0] >= sensorMax0 && sensorValues[7] >= sensorMax6){
-//  stopVehicle();
-//  servo(gripper, 1500);
-//  moveBackward(20);
-//  delay(1000);
-//  exit(0);
-//}
 
-  int position = qtr.readLineBlack(sensorValues);
-  moveForward(40);
+void loop() {
+   pixels->clear(); // Set all pixel colors to 'off'
+
+  moveForward(40);  
+  scanDistance();
+  Serial.println(distance);
   distanceForward = distance;
   stopVehicle();
   servo(neck, 2400);
   scanDistance();
   distanceRight = distance;
-  //Serial.println(distanceRight);
-  delayMicroseconds(80);
+  Serial.println(distanceRight);
+  delay(200);
   servo(neck, 400);
-  delayMicroseconds(80);
+  delay(200);
   scanDistance();
   distanceLeft = distance;
-  //Serial.println(distanceLeft);
+  Serial.println(distanceLeft);
   servo(neck, 1400);
-  //Serial.println("keuze maken");
-
-  if(distanceForward <= 20){
-    if(distanceRight > distanceLeft){
-      turnRight(10);
-    } else{
-      turnLeft(10);
+  Serial.println("keuze maken");
+  
+    if(distanceForward < 30){
+      if(distanceRight < distanceLeft){
+      Serial.println("Links");
+      turnLeft(25);
+      }else if(distanceRight > distanceLeft){
+        Serial.println("rechts");
+        turnRight(25);
+      } 
     }
-  }
-
-  for(int i = 0; i < SensorCount; i++){
-    if(SensorValues[i] == qtr.calibrationOn.maximum[i]){
-      StopVehicle();
-      exit(0);
-    }
-  }
 }
 
 
 
+
 void moveForward(int pulsecount) {
-  while(counterA <= pulsecount){
+  while(counterA <= pulsecount && counterB <= pulsecount){
   analogWrite(forwardLeft, 180);
   analogWrite(forwardRight, 182);
   analogWrite(reverseLeft, LOW);
   analogWrite(reverseRight, LOW);
-      pixels->setPixelColor(ll, pixels->Color(255,0,50));
+    pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%. 
+    pixels->setPixelColor(ll, pixels->Color(255,0,50));
     pixels->setPixelColor(lr, pixels->Color(0,0,150));
     pixels->setPixelColor(rr, pixels->Color(255,0,50));
     pixels->setPixelColor(rl, pixels->Color(0,0,150));
@@ -173,11 +132,12 @@ void moveForward(int pulsecount) {
   }
   stopVehicle();
   counterA = 0;
+  counterB = 0;
 }
 
    
 void moveBackward(int pulsecount) {
-  while(counterB <= pulsecount){
+  while(counterA <= pulsecount && counterB <= pulsecount){
     analogWrite(forwardLeft, LOW);
     analogWrite(forwardRight, LOW);
     analogWrite(reverseLeft, 210);
@@ -196,7 +156,13 @@ void turnRight(int pulsecount) {
     analogWrite(reverseRight, LOW);
   } 
     stopVehicle();
-    counterA = 0;  
+     /*
+     * Beide counters worden gereset ondanks dat er in de while maar 1 wordt aangeroepen, dit is omdat beide wielen draaien.
+     * Als counterB niet gereset wordt dan staan beide counter niet meer gelijk, dit kan nadelig effect hebben op bijvoorbeld moveForward. 
+     * Zelfde voor turnLeft.
+     */
+    counterA = 0;
+    counterB = 0;  
 } 
 
 void turnLeft(int pulsecount) {
@@ -207,6 +173,7 @@ void turnLeft(int pulsecount) {
     analogWrite(reverseRight, 170);
   } 
     stopVehicle();
+    counterA = 0;
     counterB = 0; 
 } 
  
@@ -223,8 +190,7 @@ void stopVehicle(){
   analogWrite(forwardRight, LOW); 
   analogWrite(reverseLeft, LOW);   
   analogWrite(reverseRight, LOW);
-  counterA = 0;
-  counterB = 0;
+    pixels->setBrightness(70);
     pixels->setPixelColor(ll, pixels->Color(255,0,0));
     pixels->setPixelColor(lr, pixels->Color(255,0,0));
     pixels->setPixelColor(rr, pixels->Color(255,0,0));
