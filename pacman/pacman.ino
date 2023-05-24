@@ -5,47 +5,52 @@
 #include "music.h"
 //defineer alle pinnen en globale variabelen
 //Neopixels
-int neopin =  4; 
-int numPixels  = 12; 
-int pixelFormat = NEO_RGB + NEO_KHZ800;
-Adafruit_NeoPixel *pixels;
- byte ll = 0;
- byte lr = 1;
- byte rr = 2;
- byte rl = 3;
- byte uglow1 = 4;
- byte uglow2 = 5;
- byte uglow3 = 6;
- byte uglow4 = 7;
- byte uglow5 = 8;
- byte uglow6 = 9;
- byte uglow7 = 10;
- byte uglow8 = 11;
+const byte neopin =  4;                                                                         //neopin
+const byte numPixels  = 12;                                                                     //num neopixels
+const int pixelFormat = NEO_RGB + NEO_KHZ800;                                                   //zet het pixelformat. LET OP! De neopixels op de robot zelf is RGB, de strip voor de underglow is GBR!
+Adafruit_NeoPixel *pixels;                                                                      //maak een pointer met van type adrafruit neopixels 
+//om de neopixels individeel aan te sturen geef je ze een nummer. 
+//---- neopixels op de robot ------
+ const byte ll = 0;
+ const byte lr = 1;
+ const byte rr = 2;
+ const byte rl = 3;
+//------------------------------------
+//----- neopixels undeglow strip ------
+ const byte uglow1 = 4;
+ const byte uglow2 = 5;
+ const byte uglow3 = 6;
+ const byte uglow4 = 7;
+ const byte uglow5 = 8;
+ const byte uglow6 = 9;
+ const byte uglow7 = 10;
+ const byte uglow8 = 11;
+ //---------------------------------
 //ultrasonic
-int echoPin = 13;
-int triggerPin = 12; 
-double duration; 
-double distance;
-double distanceLeft;
-double distanceRight;
-double distanceForward;
+const byte echoPin = 13;                                                                        //echopin
+const byte triggerPin = 12;                                                                     //triggerpin
+double duration;                                                                                //tijd tussen trigger en echo
+double distance;                                                                                //gemeten afstand
+double distanceLeft;                                                                            //gemeten afstand vooruit
+double distanceRight;                                                                           //gemeten afstand rechts van de robot
+double distanceForward;                                                                         //gemeten afstand links van de robot
 //wheels
-int reverseRight = 9;
-int forwardRight = 10;
-int reverseLeft = 6;
-int forwardLeft = 11;
+const byte reverseRight = 9;
+const byte forwardRight = 10;
+const byte reverseLeft = 6;
+const byte forwardLeft = 11;
 //pulsesensor
-int speedSensorA = 2; //rechts
-int speedSensorB = 3; //links
-int counterA = 0;
-int counterB = 0;
+const byte speedSensorA = 2;                                                                    //sensor rechts
+const byte speedSensorB = 3;                                                                    //sensor links
+int counterA = 0;                                                                               //counter voor sensor rechts
+int counterB = 0;                                                                               //counter voor sensor links
 //servos
-int gripper = 8;
-int neck = 7;
+const byte gripper = 8;                                                                         //servo voor de gripper
+const byte neck = 7;                                                                            //servo voor de neck met de ultrasonic 
 //line tracker
-QTRSensors qtr;
-const int SensorCount = 8;
-int sensorValues[SensorCount];
+QTRSensors qtr;                                                                                 //variable met het tyoe QTRSensors 
+const byte SensorCount = 8;                                                                     //num sensors op line tracker 
+int sensorValues[SensorCount];                                                                  //sensorwaardes van de line tracker. wordt gelezen met een for loop of per sensor.
 
 void setup() {
   Serial.begin(9600);
@@ -59,13 +64,12 @@ void setup() {
   pinMode(speedSensorB, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(speedSensorA), countA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(speedSensorB), countB, CHANGE);
-  pixels = new Adafruit_NeoPixel(numPixels, neopin, pixelFormat);
-  pixels->begin();
-  digitalWrite(neck, LOW);
-  qtr.setTypeAnalog();
-  //zet alle analoge pinnen als input pinnen voor de line tracker
-  qtr.setSensorPins((const byte[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);
-  //calibrateSensors();
+  pixels = new Adafruit_NeoPixel(numPixels, neopin, pixelFormat);                               //koppel een nieuw adafruit neopixels object aan de pointer "pixels"
+  pixels->begin();                                                                              //zet de neopixels "aan"
+  digitalWrite(neck, LOW);                                                                      //zet de servo van de neck standaard op LOW, dan schiet deze niet terug na het draaien
+  qtr.setTypeAnalog();                                                                          //zet de meettype op analoog
+  qtr.setSensorPins((const byte[]){A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);               //zet alle analoge pinnen als input pinnen voor de line tracker
+  calibrateSensors();
 //  moveForward(60);  
 //  servo(gripper, 500);
 //  turnRight(25);
@@ -74,46 +78,52 @@ void setup() {
 
 
 void loop() {
-   pixels->clear(); // Set all pixel colors to 'off'
-
-  moveForward(40);  
-  scanDistance();
-  Serial.println(distance);
-  distanceForward = distance;
-  stopVehicle();
-  servo(neck, 2400);
-  scanDistance();
-  distanceRight = distance;
-  Serial.println(distanceRight);
-  delay(200);
-  servo(neck, 400);
-  delay(200);
-  scanDistance();
-  distanceLeft = distance;
-  Serial.println(distanceLeft);
-  servo(neck, 1400);
-  Serial.println("keuze maken");
-  
-    if(distanceForward < 30){
-      if(distanceRight < distanceLeft){
-      Serial.println("Links");
-      turnLeft(25);
-      }else if(distanceRight > distanceLeft){
-        Serial.println("rechts");
-        turnRight(25);
-      } 
-    }
+//   pixels->clear();                                                                            //zet alle neopixels op neutraal
+//
+//  moveForward(40);  
+//  scanDistance();
+//  Serial.println(distance);
+//  distanceForward = distance;
+//  stopVehicle();
+//  servo(neck, 2400);
+//  scanDistance();
+//  distanceRight = distance;
+//  Serial.println(distanceRight);
+//  delay(300);
+//  servo(neck, 400);
+//  delay(300);
+//  scanDistance();
+//  distanceLeft = distance;
+//  Serial.println(distanceLeft);
+//  servo(neck, 1400);
+//  Serial.println("keuze maken");
+//  
+//    if(distanceForward < 30){
+//      if(distanceRight < distanceLeft){
+//      Serial.println("Links");
+//      turnLeft(30);
+//      }else if(distanceRight > distanceLeft){
+//        Serial.println("rechts");
+//        turnRight(30);
+//      } 
+//    }
 }
 
 
 
-
+/*
+ * moveForward en moveBackward hebben 2 extra lijnen code. Beide functies hebben eerst een soort van wake up (de 2 analogwrites met 255).
+ * Tijdens het maken van de calibratie bleef de robot niet stabiel, dit kwam omdat, vrij logisch, de robot eerst alle gewicht moet meetrekken.
+ * Toen de 'wake up" er niet inzat bleven de wielen vaak hangen en ging hij schreef.
+ */
 void moveForward(int pulsecount) {
   while(counterA <= pulsecount && counterB <= pulsecount){
+  analogWrite(forwardLeft, 255);
+  analogWrite(forwardRight, 255);
   analogWrite(forwardLeft, 180);
-  analogWrite(forwardRight, 182);
-  analogWrite(reverseLeft, LOW);
-  analogWrite(reverseRight, LOW);
+  analogWrite(forwardRight, 180);
+  analogWrite(reverseLeft, 0);
+  analogWrite(reverseRight, 0);
     pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%. 
     pixels->setPixelColor(ll, pixels->Color(255,0,50));
     pixels->setPixelColor(lr, pixels->Color(0,0,150));
@@ -128,7 +138,8 @@ void moveForward(int pulsecount) {
     pixels->setPixelColor(uglow6, pixels->Color(0,0,250));
     pixels->setPixelColor(uglow7, pixels->Color(0,255,50));
     pixels->setPixelColor(uglow8, pixels->Color(0,0,250));
-  pixels->show();
+    pixels->show();
+  
   }
   stopVehicle();
   counterA = 0;
@@ -138,10 +149,12 @@ void moveForward(int pulsecount) {
    
 void moveBackward(int pulsecount) {
   while(counterA <= pulsecount && counterB <= pulsecount){
-    analogWrite(forwardLeft, LOW);
-    analogWrite(forwardRight, LOW);
-    analogWrite(reverseLeft, 210);
-    analogWrite(reverseRight, 188);
+    analogWrite(reverseLeft, 255);
+    analogWrite(reverseRight, 255);
+    analogWrite(forwardLeft, 0);
+    analogWrite(forwardRight, 0);
+    analogWrite(reverseLeft, 180);
+    analogWrite(reverseRight, 175);
   } 
     stopVehicle();
     counterA = 0;
@@ -154,11 +167,26 @@ void turnRight(int pulsecount) {
     analogWrite(forwardRight, 180);
     analogWrite(reverseLeft, 170);
     analogWrite(reverseRight, LOW);
+    pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%. 
+    pixels->setPixelColor(ll, pixels->Color(0,0,150));
+    pixels->setPixelColor(lr, pixels->Color(255,0,50));
+    pixels->setPixelColor(rr, pixels->Color(255,0,50));
+    pixels->setPixelColor(rl, pixels->Color(0,0,150));
+    //underglow neopixels    
+    pixels->setPixelColor(uglow1, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow2, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow3, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow4, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow5, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow6, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow7, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow8, pixels->Color(0,0,150));
+    pixels->show();
   } 
     stopVehicle();
      /*
      * Beide counters worden gereset ondanks dat er in de while maar 1 wordt aangeroepen, dit is omdat beide wielen draaien.
-     * Als counterB niet gereset wordt dan staan beide counter niet meer gelijk, dit kan nadelig effect hebben op bijvoorbeld moveForward. 
+     * Als counterB niet gereset wordt dan staan beide counters niet meer gelijk, dit kan nadelig effect hebben op alle nakomemde function calls.  
      * Zelfde voor turnLeft.
      */
     counterA = 0;
@@ -171,7 +199,23 @@ void turnLeft(int pulsecount) {
     analogWrite(forwardRight, LOW);
     analogWrite(reverseLeft, LOW);
     analogWrite(reverseRight, 170);
+    pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%. 
+    pixels->setPixelColor(ll, pixels->Color(255,0,50));
+    pixels->setPixelColor(lr, pixels->Color(0,0,150));
+    pixels->setPixelColor(rr, pixels->Color(0,0,150));
+    pixels->setPixelColor(rl, pixels->Color(255,0,50));
+    //underglow neopixels    
+    pixels->setPixelColor(uglow1, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow2, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow3, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow4, pixels->Color(0,0,150));
+    pixels->setPixelColor(uglow5, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow6, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow7, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow8, pixels->Color(0,255,50));
+    pixels->show();
   } 
+
     stopVehicle();
     counterA = 0;
     counterB = 0; 
@@ -191,21 +235,23 @@ void stopVehicle(){
   analogWrite(reverseLeft, LOW);   
   analogWrite(reverseRight, LOW);
     pixels->setBrightness(70);
-    pixels->setPixelColor(ll, pixels->Color(255,0,0));
-    pixels->setPixelColor(lr, pixels->Color(255,0,0));
-    pixels->setPixelColor(rr, pixels->Color(255,0,0));
-    pixels->setPixelColor(rl, pixels->Color(255,0,0));
+    pixels->setPixelColor(ll, pixels->Color(255,0,50));
+    pixels->setPixelColor(lr, pixels->Color(255,0,50));
+    pixels->setPixelColor(rr, pixels->Color(255,0,50));
+    pixels->setPixelColor(rl, pixels->Color(255,0,50));
     //underglow neopixels
-    pixels->setPixelColor(uglow1, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow2, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow3, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow4, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow5, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow6, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow7, pixels->Color(0,255,0));
-    pixels->setPixelColor(uglow8, pixels->Color(0,255,0));
+    pixels->setPixelColor(uglow1, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow2, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow3, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow4, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow5, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow6, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow7, pixels->Color(0,255,50));
+    pixels->setPixelColor(uglow8, pixels->Color(0,255,50));
   pixels->show();
  }
+
+
 
 void scanDistance() {
   digitalWrite(triggerPin, LOW);
@@ -238,7 +284,7 @@ void calibrateSensors(){
     }
     stopVehicle();
     for(int k = 1; k <= 5; k++){
-      moveBackward(2);
+      moveBackward(1);
       counterA = 0;
       counterB = 0;
     }
