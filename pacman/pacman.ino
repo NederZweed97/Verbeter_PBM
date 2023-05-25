@@ -1,4 +1,4 @@
-//Sarah Vogelzang
+//Sarah Vogelzang.
 //Vebetering van BattleBot
 #include <Adafruit_NeoPixel.h>
 #include <QTRSensors.h>
