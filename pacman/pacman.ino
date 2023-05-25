@@ -34,14 +34,14 @@ double distance;                                                                
 double distanceLeft;                                                                            //gemeten afstand vooruit
 double distanceRight;                                                                           //gemeten afstand rechts van de robot
 double distanceForward;                                                                         //gemeten afstand links van de robot
-const int minDistance = 45;                                                                     //minimale aftsand wat de robot moet houden
+const double minDistance = 15;                                                                     //minimale aftsand wat de robot moet houden
 //wheels
 const byte reverseRight = 9;
 const byte forwardRight = 10;
 const byte reverseLeft = 6;
 const byte forwardLeft = 11;
 const int startWheels = 255;                                                                    //de 'wake up' voor de motoren
-const int wheelSpeedRight = 182;                                                                //gewenste snelheid rechter wiel
+const int wheelSpeedRight = 180;                                                                //gewenste snelheid rechter wiel
 const int wheelSpeedLeft = 180;                                                                 //gewenste snelheid linker wiel
 const int stopWheels = 0;                                                                       //stop de motoren
 //pulsesensor
@@ -74,11 +74,12 @@ void setup() {
   digitalWrite(neck, LOW);                                                                      //zet de servo van de neck standaard op LOW, dan schiet deze niet terug na het draaien
   qtr.setTypeAnalog();                                                                          //zet de meettype op analoog
   qtr.setSensorPins((const byte[]) {A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);               //zet alle analoge pinnen als input pinnen voor de line tracker
+  servo(gripper, 400);
   calibrateSensors();
-  moveForward(50);
-  servo(gripper, 500);
-  turnRight(35);
-  playMusic(); //functie, noten en lied staat in music.h
+//moveForward(20);
+ //moveForward(30);
+  turnRight(30);
+  //playMusic(); //functie, noten en lied staat in music.h
 
 }
 
@@ -86,7 +87,7 @@ void setup() {
 void loop() {
   //   pixels->clear();                                                                            //zet alle neopixels op neutraal
   //
-  moveForward(60);
+  moveForward(45);
   scanDistance();
   Serial.println(distance);
   //Serial.println("vooruit");
@@ -295,21 +296,13 @@ void servo(int PIN, int pulse) {
 }
 
 void calibrateSensors() {
-  for (int i = 1; i <= 10; i++) {
-    qtr.calibrate();
-    for (int j = 1; j <= 5; j++) {
-      moveForward(3);
-      counterA = 0;
-      counterB = 0;
+
+  for (int i = 1; i <= 13; i++) {
+      moveForward(i);
+      qtr.calibrate();
     }
-    stopVehicle();
-    for (int k = 1; k <= 5; k++) {
-      moveBackward(3);
-      counterA = 0;
-      counterB = 0;
-    }
-  }
-  stopVehicle();
+   
+  
 
   for (int i = 0; i < SensorCount; i++)
   {
