@@ -34,7 +34,7 @@ double distance;                                                                
 double distanceLeft;                                                                            //gemeten afstand vooruit
 double distanceRight;                                                                           //gemeten afstand rechts van de robot
 double distanceForward;                                                                         //gemeten afstand links van de robot
-const double minDistance = 15;                                                                     //minimale aftsand wat de robot moet houden
+const double minDistance = 12;                                                                  //minimale aftsand wat de robot moet houden
 //wheels
 const byte reverseRight = 9;
 const byte forwardRight = 10;
@@ -75,58 +75,75 @@ void setup() {
   qtr.setTypeAnalog();                                                                          //zet de meettype op analoog
   qtr.setSensorPins((const byte[]) {A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);               //zet alle analoge pinnen als input pinnen voor de line tracker
   servo(gripper, 400);
-  calibrateSensors();
-//moveForward(20);
- //moveForward(30);
+  playMusic(); //functie, noten en lied staat in music.h
+  moveForwardwithoutusonic(70);
   turnRight(30);
-  //playMusic(); //functie, noten en lied staat in music.h
-
 }
 
-
 void loop() {
-  //   pixels->clear();                                                                            //zet alle neopixels op neutraal
-  //
-  moveForward(45);
-  scanDistance();
-  Serial.println(distance);
-  //Serial.println("vooruit");
-  distanceForward = distance;
-  stopVehicle();
-  servo(neck, 2400);
-  scanDistance();
-  distanceRight = distance;
-  //  Serial.println(distanceRight);
-  //  Serial.println("rechts");
-  delay(300);
-  servo(neck, 400);
-  delay(300);
-  scanDistance();
-  distanceLeft = distance;
-  //  Serial.println(distanceLeft);
-  //  Serial.println("links");
-  servo(neck, 1400);
-  //Serial.println("keuze maken");
-
+  readGhost();
+  moveForward(40);
+  readGhost();
+  lookAround();
+  readGhost();
 
   if (distanceForward <= minDistance && distanceForward < distanceLeft && distanceRight < distanceLeft) {
-    turnLeft(25);
+    turnLeft(23);
   } else if (distanceForward <= minDistance && distanceForward < distanceRight && distanceRight > distanceLeft) {
-    turnRight(25);
+    turnRight(23);
   } else if (distanceForward < 30 && distanceRight < 20 && distanceLeft < 30) {
     Turn180DLeft();
   }  else if (distanceForward < 30 && distanceRight < 30 && distanceLeft < 20) {
     Turn180DRight();
-  }
+ }
+
+  readGhost();
 }
 
-/*
-   moveForward en moveBackward hebben 2 extra lijnen code. Beide functies hebben eerst een soort van wake up (de 2 analogwrites met 255).
-   Tijdens het maken van de calibratie bleef de robot niet stabiel, dit kwam omdat, vrij logisch, de robot eerst alle gewicht moet meetrekken.
-   Toen de 'wake up" er niet inzat bleven de wielen vaak hangen en ging hij schreef.
-*/
 void moveForward(int pulsecount) {
   while (counterA <= pulsecount && counterB <= pulsecount) {
+   readGhost();
+   scanDistance();
+    if(distance < 7){
+      stopVehicle();
+      lookAround();
+        if(distanceRight > distanceLeft){
+          turnRight(23);
+        } else{
+          turnLeft(23);
+        }
+      } else{
+        analogWrite(forwardLeft, startWheels);
+        analogWrite(forwardRight, startWheels);
+        analogWrite(forwardLeft, wheelSpeedLeft);
+        analogWrite(forwardRight, wheelSpeedRight);
+        analogWrite(reverseLeft, stopWheels);
+        analogWrite(reverseRight, stopWheels);
+        pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%.
+        pixels->setPixelColor(ll, pixels->Color(255, 0, 50));
+        pixels->setPixelColor(lr, pixels->Color(0, 0, 150));
+        pixels->setPixelColor(rr, pixels->Color(255, 0, 50));
+        pixels->setPixelColor(rl, pixels->Color(0, 0, 150));
+        //underglow neopixels
+        pixels->setPixelColor(uglow1, pixels->Color(0, 255, 50));
+        pixels->setPixelColor(uglow2, pixels->Color(0, 0, 250));
+        pixels->setPixelColor(uglow3, pixels->Color(0, 255, 50));
+        pixels->setPixelColor(uglow4, pixels->Color(0, 0, 250));
+        pixels->setPixelColor(uglow5, pixels->Color(0, 255, 50));
+        pixels->setPixelColor(uglow6, pixels->Color(0, 0, 250));
+        pixels->setPixelColor(uglow7, pixels->Color(0, 255, 50));
+        pixels->setPixelColor(uglow8, pixels->Color(0, 0, 250));
+        pixels->show();
+      }
+  }
+  stopVehicle();
+  counterA = 0;
+  counterB = 0;
+ 
+}
+
+void moveForwardwithoutusonic(int pulsecount) {
+  while (/*counterA <= pulsecount &&*/ counterB <= pulsecount) {
     analogWrite(forwardLeft, startWheels);
     analogWrite(forwardRight, startWheels);
     analogWrite(forwardLeft, wheelSpeedLeft);
@@ -148,22 +165,46 @@ void moveForward(int pulsecount) {
     pixels->setPixelColor(uglow7, pixels->Color(0, 255, 50));
     pixels->setPixelColor(uglow8, pixels->Color(0, 0, 250));
     pixels->show();
-
   }
   stopVehicle();
-  counterA = 0;
+  //counterA = 0;
   counterB = 0;
+}
+
+
+void lookAround(){
+  stopVehicle();
+   scanDistance();
+  //Serial.println(distance);
+  //Serial.println("vooruit");
+  distanceForward = distance;
+  Serial.println(distanceForward);
+  stopVehicle();
+  servo(neck, 2400);
+  scanDistance();
+  distanceRight = distance;
+  //  Serial.println(distanceRight);
+  //  Serial.println("rechts");
+  delay(300);
+  servo(neck, 400);
+  delay(300);
+  scanDistance();
+  distanceLeft = distance;
+  //  Serial.println(distanceLeft);
+  //  Serial.println("links");
+  servo(neck, 1400);
+  //Serial.println("keuze maken");
 }
 
 
 void moveBackward(int pulsecount) {
   while (counterA <= pulsecount && counterB <= pulsecount) {
-    analogWrite(reverseLeft, 255);
-    analogWrite(reverseRight, 255);
-    analogWrite(forwardLeft, 0);
-    analogWrite(forwardRight, 0);
-    analogWrite(reverseLeft, 180);
-    analogWrite(reverseRight, 175);
+    analogWrite(reverseLeft, startWheels);
+    analogWrite(reverseRight, startWheels);
+    analogWrite(forwardLeft, stopWheels);
+    analogWrite(forwardRight, stopWheels);
+    analogWrite(reverseLeft, wheelSpeedLeft);
+    analogWrite(reverseRight, wheelSpeedRight);
   }
   stopVehicle();
   counterA = 0;
@@ -173,21 +214,21 @@ void moveBackward(int pulsecount) {
 void Turn180DRight() {
   turnRight(20);
   moveBackward(10);
-  turnRight(20);
+  turnRight(25);
 }
 
 void Turn180DLeft() {
   turnLeft(20);
   moveBackward(10);
-  turnLeft(20);
+  turnLeft(25);
 }
 
 void turnRight(int pulsecount) {
   while (counterA <= pulsecount) {
-    analogWrite(forwardLeft, LOW);
-    analogWrite(forwardRight, 180);
-    analogWrite(reverseLeft, 170);
-    analogWrite(reverseRight, LOW);
+    analogWrite(forwardLeft, stopWheels);
+    analogWrite(forwardRight, wheelSpeedRight);
+    analogWrite(reverseLeft, wheelSpeedLeft);
+    analogWrite(reverseRight, stopWheels);
     pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%.
     pixels->setPixelColor(ll, pixels->Color(0, 0, 150));
     pixels->setPixelColor(lr, pixels->Color(255, 0, 50));
@@ -216,10 +257,10 @@ void turnRight(int pulsecount) {
 
 void turnLeft(int pulsecount) {
   while (counterB <= pulsecount) {
-    analogWrite(forwardLeft, 180);
-    analogWrite(forwardRight, LOW);
-    analogWrite(reverseLeft, LOW);
-    analogWrite(reverseRight, 170);
+    analogWrite(forwardLeft, wheelSpeedLeft);
+    analogWrite(forwardRight, stopWheels);
+    analogWrite(reverseLeft, stopWheels);
+    analogWrite(reverseRight, wheelSpeedRight);
     pixels->setBrightness(85); //helderheid omlaag, deze stond eerst op 100%.
     pixels->setPixelColor(ll, pixels->Color(255, 0, 50));
     pixels->setPixelColor(lr, pixels->Color(0, 0, 150));
@@ -236,7 +277,6 @@ void turnLeft(int pulsecount) {
     pixels->setPixelColor(uglow8, pixels->Color(0, 255, 50));
     pixels->show();
   }
-
   stopVehicle();
   counterA = 0;
   counterB = 0;
@@ -251,10 +291,10 @@ void countB() {
 }
 
 void stopVehicle() {
-  analogWrite(forwardLeft, LOW);
-  analogWrite(forwardRight, LOW);
-  analogWrite(reverseLeft, LOW);
-  analogWrite(reverseRight, LOW);
+  analogWrite(forwardLeft, stopWheels);
+  analogWrite(forwardRight, stopWheels);
+  analogWrite(reverseLeft, stopWheels);
+  analogWrite(reverseRight, stopWheels);
   pixels->setBrightness(70);
   pixels->setPixelColor(ll, pixels->Color(255, 0, 50));
   pixels->setPixelColor(lr, pixels->Color(255, 0, 50));
@@ -270,9 +310,9 @@ void stopVehicle() {
   pixels->setPixelColor(uglow7, pixels->Color(0, 255, 50));
   pixels->setPixelColor(uglow8, pixels->Color(0, 255, 50));
   pixels->show();
+  counterA = 0;
+  counterB = 0;
 }
-
-
 
 void scanDistance() {
   digitalWrite(triggerPin, LOW);
@@ -295,25 +335,23 @@ void servo(int PIN, int pulse) {
   }
 }
 
-void calibrateSensors() {
-
-  for (int i = 1; i <= 13; i++) {
-      moveForward(i);
-      qtr.calibrate();
-    }
-   
-  
-
-  for (int i = 0; i < SensorCount; i++)
-  {
-    Serial.print(qtr.calibrationOn.minimum[i]);
-    Serial.print(' ');
+void readGhost(){
+  if(sensorValues[2] > 170 && sensorValues[2] < 175 && sensorValues[5] > 170 && sensorValues[5] < 175){ //blauwe spook
+    stopVehicle();
+    turnLeft(20);
+    moveForwardwithoutusonic(80);
   }
-  Serial.println();
-  // print the calibration maximum values measured when emitters were on
-  for (int i = 0; i < SensorCount; i++)
-  {
-    Serial.print(qtr.calibrationOn.maximum[i]);
-    Serial.print(' ');
+  if(sensorValues[2] > 280 && sensorValues[2] < 285 && sensorValues[5] > 280 && sensorValues[5] < 285 ){ //donker roze spook
+    Turn180DRight();
+  }
+
+  if(sensorValues[2] > 308 && sensorValues[2] < 312 && sensorValues[5] > 308 && sensorValues[5] < 312){ //lila spook 311 (312) en 309 (308)
+    stopVehicle();
+  }
+
+  if(sensorValues[2] > 321 && sensorValues[2] < 328 && sensorValues[5] > 321 && sensorValues[5] < 328){ // donker paars spook 322 327
+    stopVehicle();
+    moveBackward(20);
+    turnRight(25);
   }
 }
