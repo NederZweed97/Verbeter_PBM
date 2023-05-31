@@ -75,8 +75,8 @@ void setup() {
   qtr.setTypeAnalog();                                                                          //zet de meettype op analoog
   qtr.setSensorPins((const byte[]) {A0, A1, A2, A3, A4, A5, A6, A7}, SensorCount);               //zet alle analoge pinnen als input pinnen voor de line tracker
   servo(gripper, 400);
-  playMusic(); //functie, noten en lied staat in music.h
-  moveForwardwithoutusonic(70);
+  //playMusic(); //functie, noten en lied staat in music.h
+  moveForwardwithoutusonic(75);
   turnRight(30);
 }
 
@@ -88,12 +88,12 @@ void loop() {
   readGhost();
 
   if (distanceForward <= minDistance && distanceForward < distanceLeft && distanceRight < distanceLeft) {
-    turnLeft(23);
+    turnLeft(20);
   } else if (distanceForward <= minDistance && distanceForward < distanceRight && distanceRight > distanceLeft) {
-    turnRight(23);
-  } else if (distanceForward < 30 && distanceRight < 20 && distanceLeft < 30) {
+    turnRight(20);
+  } else if (distanceForward < 18 && distanceRight < 10 && distanceLeft < 15) {
     Turn180DLeft();
-  }  else if (distanceForward < 30 && distanceRight < 30 && distanceLeft < 20) {
+  }  else if (distanceForward < 18 && distanceRight < 10 && distanceLeft < 15) {
     Turn180DRight();
  }
 
@@ -106,11 +106,12 @@ void moveForward(int pulsecount) {
    scanDistance();
     if(distance < 7){
       stopVehicle();
+      moveBackward(10);
       lookAround();
         if(distanceRight > distanceLeft){
-          turnRight(23);
+          turnRight(20);
         } else{
-          turnLeft(23);
+          turnLeft(20);
         }
       } else{
         analogWrite(forwardLeft, startWheels);
